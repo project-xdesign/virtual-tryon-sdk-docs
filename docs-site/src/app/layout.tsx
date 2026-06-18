@@ -3,13 +3,18 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://docs.snapmydesign.com"),
   title: "Snapmydesign VTON API Reference",
   description: "Comprehensive API reference and developer documentation for integrating Snapmydesign Virtual Try-On (VTON) services.",
   keywords: ["VTON", "Virtual Try-On", "Snapmydesign", "AI Fashion", "E-commerce SDK", "API Documentation"],
   openGraph: {
     title: "Snapmydesign VTON API Reference",
     description: "Comprehensive API reference and developer documentation for integrating Snapmydesign Virtual Try-On (VTON) services.",
-    type: "website"
+    type: "website",
+    siteName: "Snapmydesign VTON SDK & API Reference"
+  },
+  verification: {
+    google: "google-site-verification-token-placeholder", // Allows verification in Google Search Console
   }
 };
 

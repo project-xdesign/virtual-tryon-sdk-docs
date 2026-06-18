@@ -61,11 +61,8 @@ export async function generateStaticParams() {
   ];
 }
 
-// SEO Dynamic Metadata Generation
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const resolvedParams = await params;
-  const slug = resolvedParams.slug || [];
-
+// Helper to get structured SEO metadata dynamically based on slug configuration
+function getSeoMetadata(slug: string[]): { title: string; description: string; canonical: string } {
   let category = "api";
   let subSlug = slug;
 
@@ -73,68 +70,312 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     if (["api", "flutter", "ios", "android"].includes(slug[0])) {
       category = slug[0];
       subSlug = slug.slice(1);
+    } else {
+      // Backward-compatible raw path (e.g. ["authentication"] -> api category)
+      category = "api";
+      subSlug = slug;
     }
   }
 
-  let title = "Introduction | Snapmydesign VTON SDK & API Documentation";
-  let description = "Welcome to the Snapmydesign Virtual Try-On SDK reference. Integrate AI-powered virtual try-on models into API, Flutter, iOS, and Android applications.";
+  let title = "Virtual Try-On VTON API & SDK Documentation | Snapmydesign";
+  let description = "Welcome to the official Snapmydesign VTON API reference. Integrate state-of-the-art AI-powered virtual try-on models into your e-commerce and mobile applications.";
 
   if (category === "api") {
-    if (subSlug.length === 1) {
+    if (subSlug.length === 0) {
+      title = "Virtual Try-On VTON API & SDK Documentation | Snapmydesign";
+      description = "Welcome to the official Snapmydesign VTON API reference. Integrate state-of-the-art AI-powered virtual try-on models into your e-commerce and mobile applications.";
+    } else if (subSlug.length === 1) {
       const page = subSlug[0];
       if (page === "authentication") {
-        title = "Authentication | Snapmydesign VTON API";
-        description = "Learn how to authorize your API requests securely using your X-API-Key header.";
+        title = "API Authentication & X-API-Key Headers | Snapmydesign VTON Docs";
+        description = "Securely authenticate your VTON API requests. Learn how to obtain and pass your X-API-Key headers for client/server communications.";
       } else if (page === "workflow") {
-        title = "Integration Workflow | Snapmydesign VTON API";
-        description = "Understand the 3-step cycle of uploading assets, generating try-ons, and auditing histories.";
+        title = "Virtual Try-On API Integration Workflow | Snapmydesign VTON Docs";
+        description = "A step-by-step developer integration workflow for the virtual try-on API. Learn how to upload files, run rendering processes, and query outputs.";
       } else if (page === "credit-matrix") {
-        title = "Model & Credit Matrix | Snapmydesign VTON API";
-        description = "Compare speeds, quality, and credit costs for VTON models.";
+        title = "AI VTON Model Types & Credit Pricing Matrix | Snapmydesign VTON Docs";
+        description = "Compare credit pricing and processing speeds across different virtual try-on rendering engine layers, from Fast to Premium Quality.";
       } else if (page === "errors") {
-        title = "Error Handling & Exceptions | Snapmydesign VTON API";
-        description = "Structured errors, HTTP response status codes, and exception resolutions.";
+        title = "API Error Handling, Codes, & Exception Resolution | Snapmydesign VTON Docs";
+        description = "Complete index of VTON API response status codes, exceptions, validation details, and recommended developer resolutions.";
       } else if (page === "examples") {
-        title = "Code Examples | Snapmydesign VTON API Integration";
-        description = "Get started instantly with copy-pasteable script samples in cURL, Python, and NodeJS.";
+        title = "VTON Integration Code Examples & Scripts | Snapmydesign VTON Docs";
+        description = "Kickstart your integration with ready-to-use virtual try-on code snippets in cURL, Python requests, and Axios/Node.js.";
       }
     } else if (subSlug.length === 2 && subSlug[0] === "endpoints") {
       const endpointId = subSlug[1];
       const endpoint = ENDPOINTS.find((e) => e.id === endpointId);
       if (endpoint) {
-        title = `${endpoint.title} (${endpoint.method} ${endpoint.path}) | API Reference`;
+        title = `${endpoint.title} (${endpoint.method} ${endpoint.path}) | Snapmydesign API Reference`;
         description = endpoint.description;
       }
     }
   } else if (category === "flutter") {
-    title = "Flutter SDK Docs | Snapmydesign VTON";
-    if (subSlug.length === 1) {
-      title = `${subSlug[0].toUpperCase()} | Flutter SDK Docs`;
+    if (subSlug.length === 0) {
+      title = "Flutter SDK Integration for Virtual Try-On | Snapmydesign Docs";
+      description = "Learn how to embed native virtual try-on components inside cross-platform Flutter mobile applications.";
+    } else if (subSlug.length === 1) {
+      const page = subSlug[0];
+      if (page === "installation") {
+        title = "Flutter SDK Installation Guide (pub.dev) | Snapmydesign VTON Docs";
+        description = "Install the snapit_sdk Flutter package into your app. Setup instructions for pubspec.yaml dependencies.";
+      } else if (page === "configuration") {
+        title = "Flutter SDK API Client & Custom Styling Setup | Snapmydesign VTON Docs";
+        description = "Configure API client credentials and build custom app theme configurations using SnapITTheme properties.";
+      } else if (page === "examples") {
+        title = "Full Flutter App Try-On Flow Examples | Snapmydesign VTON Docs";
+        description = "Explore clean stateful widget implementation examples for integrating low-level API client commands in Flutter.";
+      }
     } else if (subSlug.length === 2 && subSlug[0] === "widgets") {
-      title = `Widget: ${subSlug[1]} | Flutter SDK Docs`;
+      const widgetId = subSlug[1];
+      if (widgetId === "try-on-viewer") {
+        title = "Launch Try-On Flow Widget & Customization | Flutter SDK Docs";
+        description = "Incorporate the complete virtual try-on UI flow. Automatically handle gallery permission, uploads, and visual comparisons.";
+      }
     }
   } else if (category === "ios") {
-    title = "iOS SDK Docs | Snapmydesign VTON";
-    if (subSlug.length === 1) {
-      title = `${subSlug[0].toUpperCase()} | iOS SDK Docs`;
+    if (subSlug.length === 0) {
+      title = "Native iOS Swift SDK for Virtual Try-On | Snapmydesign Docs";
+      description = "Integrate native iOS virtual try-on features. Setup Swift network clients and UI components optimized for SwiftUI and UIKit.";
+    } else if (subSlug.length === 1) {
+      const page = subSlug[0];
+      if (page === "installation") {
+        title = "iOS SDK Installation via CocoaPods & SPM | Snapmydesign VTON Docs";
+        description = "Add the SnapIt SDK to your Apple projects using CocoaPods or Swift Package Manager (SPM).";
+      } else if (page === "controller") {
+        title = "VTONViewController UIKit Usage Reference | iOS SDK Docs";
+        description = "Learn how to instantiate and present the native VTONViewController for seamless try-on integrations inside UIKit.";
+      } else if (page === "examples") {
+        title = "SwiftUI Virtual Try-On Page Integration Example | iOS SDK Docs";
+        description = "Copy-pasteable SwiftUI View definitions showing sheet triggers, button events, and view states.";
+      }
     }
   } else if (category === "android") {
-    title = "Android SDK Docs | Snapmydesign VTON";
-    if (subSlug.length === 1) {
-      title = `${subSlug[0].toUpperCase()} | Android SDK Docs`;
+    if (subSlug.length === 0) {
+      title = "Native Android Kotlin SDK for Virtual Try-On | Snapmydesign Docs";
+      description = "Integrate virtual try-on pipelines directly inside native Android applications using Kotlin and Jetpack Compose.";
+    } else if (subSlug.length === 1) {
+      const page = subSlug[0];
+      if (page === "installation") {
+        title = "Android SDK Gradle Installation Guide | Snapmydesign VTON Docs";
+        description = "Step-by-step documentation on adding the SnapIt SDK dependency to build.gradle for Android Studio projects.";
+      } else if (page === "activity") {
+        title = "VtonActivity Native Intent Launch Guide | Android SDK Docs";
+        description = "Configure and invoke VtonActivity using native Intents and Activity result listeners for JVM apps.";
+      } else if (page === "examples") {
+        title = "Android Jetpack Compose TryOnWidget Integration Example | Android SDK Docs";
+        description = "Setup custom composable functions and handle success/failure callbacks dynamically inside Android layouts.";
+      }
     }
   }
+
+  // Canonical path calculation (ensuring correct trailing slashes)
+  let canonical = "/docs/api/";
+  if (category === "api") {
+    if (subSlug.length === 0) {
+      canonical = "/docs/api/";
+    } else if (subSlug.length === 1) {
+      canonical = `/docs/api/${subSlug[0]}/`;
+    } else if (subSlug.length === 2 && subSlug[0] === "endpoints") {
+      canonical = `/docs/api/endpoints/${subSlug[1]}/`;
+    }
+  } else {
+    if (subSlug.length === 0) {
+      canonical = `/docs/${category}/`;
+    } else if (subSlug.length === 1) {
+      canonical = `/docs/${category}/${subSlug[0]}/`;
+    } else if (subSlug.length === 2) {
+      canonical = `/docs/${category}/${subSlug[0]}/${subSlug[1]}/`;
+    }
+  }
+
+  return { title, description, canonical };
+}
+
+// Helper to generate dynamic JSON-LD structured schemas based on page category and type
+function generateJsonLd(slug: string[], title: string, description: string, canonicalUrl: string) {
+  let category = "api";
+  let subSlug = slug;
+
+  if (slug.length > 0) {
+    if (["api", "flutter", "ios", "android"].includes(slug[0])) {
+      category = slug[0];
+      subSlug = slug.slice(1);
+    } else {
+      category = "api";
+      subSlug = slug;
+    }
+  }
+
+  // Base breadcrumbs (Home is always the API/Docs introduction page)
+  const baseBreadcrumbs = [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Docs Home",
+      "item": "https://docs.snapmydesign.com/docs/api/"
+    }
+  ];
+
+  if (category !== "api") {
+    const categoryName = category.charAt(0).toUpperCase() + category.slice(1) + " SDK";
+    baseBreadcrumbs.push({
+      "@type": "ListItem",
+      "position": 2,
+      "name": categoryName,
+      "item": `https://docs.snapmydesign.com/docs/${category}/`
+    });
+    if (subSlug.length > 0) {
+      const subName = subSlug[0].charAt(0).toUpperCase() + subSlug[0].slice(1);
+      baseBreadcrumbs.push({
+        "@type": "ListItem",
+        "position": 3,
+        "name": subName,
+        "item": `https://docs.snapmydesign.com/docs/${category}/${subSlug[0]}/`
+      });
+      if (subSlug.length > 1) {
+        const leafName = subSlug[1].charAt(0).toUpperCase() + subSlug[1].slice(1);
+        baseBreadcrumbs.push({
+          "@type": "ListItem",
+          "position": 4,
+          "name": leafName,
+          "item": `https://docs.snapmydesign.com/docs/${category}/${subSlug[0]}/${subSlug[1]}/`
+        });
+      }
+    }
+  } else {
+    // API category breadcrumbs
+    if (subSlug.length > 0) {
+      if (subSlug[0] === "endpoints" && subSlug.length > 1) {
+        baseBreadcrumbs.push({
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Endpoints",
+          "item": "https://docs.snapmydesign.com/docs/api/endpoints/upload/"
+        });
+        const endpoint = ENDPOINTS.find((e) => e.id === subSlug[1]);
+        const name = endpoint ? endpoint.title : subSlug[1];
+        baseBreadcrumbs.push({
+          "@type": "ListItem",
+          "position": 3,
+          "name": name,
+          "item": `https://docs.snapmydesign.com/docs/api/endpoints/${subSlug[1]}/`
+        });
+      } else {
+        const subName = subSlug[0].charAt(0).toUpperCase() + subSlug[0].slice(1);
+        baseBreadcrumbs.push({
+          "@type": "ListItem",
+          "position": 2,
+          "name": subName,
+          "item": `https://docs.snapmydesign.com/docs/api/${subSlug[0]}/`
+        });
+      }
+    }
+  }
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": baseBreadcrumbs
+  };
+
+  // Specific article/web API/source code schemas
+  let mainSchema: any = {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": title,
+    "description": description,
+    "url": canonicalUrl,
+    "inLanguage": "en",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Snapmydesign",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://sdk.snapmydesign.com/logo-1225.webp"
+      }
+    },
+    "author": {
+      "@type": "Organization",
+      "name": "Snapmydesign"
+    },
+    "mainEntityOfPage": canonicalUrl
+  };
+
+  if (category === "api" && subSlug.length === 2 && subSlug[0] === "endpoints") {
+    const endpointId = subSlug[1];
+    const endpoint = ENDPOINTS.find((e) => e.id === endpointId);
+    if (endpoint) {
+      mainSchema = {
+        "@context": "https://schema.org",
+        "@type": "WebApi",
+        "name": endpoint.title,
+        "description": endpoint.description,
+        "url": canonicalUrl,
+        "publisher": {
+          "@type": "Organization",
+          "name": "Snapmydesign"
+        },
+        "documentation": canonicalUrl
+      };
+    }
+  } else if (["flutter", "ios", "android"].includes(category) && subSlug.includes("examples")) {
+    mainSchema = {
+      "@context": "https://schema.org",
+      "@type": "SoftwareSourceCode",
+      "name": title,
+      "description": description,
+      "codeSampleType": "full app integration snippet",
+      "programmingLanguage": category === "flutter" ? "Dart" : category === "ios" ? "Swift" : "Kotlin",
+      "runtimePlatform": category === "flutter" ? "Flutter" : category === "ios" ? "iOS" : "Android",
+      "author": {
+        "@type": "Organization",
+        "name": "Snapmydesign"
+      }
+    };
+  }
+
+  return [breadcrumbSchema, mainSchema];
+}
+
+// SEO Dynamic Metadata Generation
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const resolvedParams = await params;
+  const slug = resolvedParams.slug || [];
+  const { title, description, canonical } = getSeoMetadata(slug);
+  const canonicalUrl = `https://docs.snapmydesign.com${canonical}`;
 
   return {
     title,
     description,
-    keywords: ["VTON API", "Virtual Try-On", "Snapmydesign", "Flutter SDK", "iOS SDK", "Android SDK", "Fashion AI", "Try-on SDK"],
+    keywords: ["VTON API", "Virtual Try-On", "Snapmydesign", "Flutter SDK", "iOS SDK", "Android SDK", "Fashion AI", "Try-on SDK", "API Documentation"],
     authors: [{ name: "Snapmydesign Team" }],
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
     openGraph: {
       title,
       description,
+      url: canonicalUrl,
       type: "website",
       siteName: "Snapmydesign VTON SDK & API Reference"
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["https://sdk.snapmydesign.com/logo-1225.webp"],
     }
   };
 }
@@ -154,68 +395,77 @@ export default async function DocsPage({ params }: PageProps) {
     }
   }
 
+  let content: React.ReactNode = null;
+
   // Handle empty sub-path introduction pages
   if (subSlug.length === 0) {
-    if (category === "api") return renderIntro();
-    if (category === "flutter") return renderFlutterIntro();
-    if (category === "ios") return renderIosIntro();
-    if (category === "android") return renderAndroidIntro();
-  }
-
-  // Handle sub-pages
-  if (category === "api") {
+    if (category === "api") content = renderIntro();
+    else if (category === "flutter") content = renderFlutterIntro();
+    else if (category === "ios") content = renderIosIntro();
+    else if (category === "android") content = renderAndroidIntro();
+  } else if (category === "api") {
+    // Handle sub-pages
     if (subSlug.length === 1) {
       const page = subSlug[0];
-      if (page === "authentication") return renderAuthentication();
-      if (page === "workflow") return renderWorkflow();
-      if (page === "credit-matrix") return renderCreditMatrix();
-      if (page === "errors") return renderErrors();
-      if (page === "examples") return renderExamples();
-      return notFound();
-    }
-    if (subSlug.length === 2 && subSlug[0] === "endpoints") {
+      if (page === "authentication") content = renderAuthentication();
+      else if (page === "workflow") content = renderWorkflow();
+      else if (page === "credit-matrix") content = renderCreditMatrix();
+      else if (page === "errors") content = renderErrors();
+      else if (page === "examples") content = renderExamples();
+    } else if (subSlug.length === 2 && subSlug[0] === "endpoints") {
       const endpointId = subSlug[1];
       const endpoint = ENDPOINTS.find((e) => e.id === endpointId);
-      if (!endpoint) return notFound();
-      return renderEndpoint(endpoint);
+      if (endpoint) {
+        content = renderEndpoint(endpoint);
+      }
     }
-  }
-
-  if (category === "flutter") {
+  } else if (category === "flutter") {
     if (subSlug.length === 1) {
       const page = subSlug[0];
-      if (page === "installation") return renderFlutterInstallation();
-      if (page === "configuration") return renderFlutterConfiguration();
-      if (page === "examples") return renderFlutterExamples();
-    }
-    if (subSlug.length === 2 && subSlug[0] === "widgets") {
+      if (page === "installation") content = renderFlutterInstallation();
+      else if (page === "configuration") content = renderFlutterConfiguration();
+      else if (page === "examples") content = renderFlutterExamples();
+    } else if (subSlug.length === 2 && subSlug[0] === "widgets") {
       const widgetId = subSlug[1];
-      if (widgetId === "try-on-viewer") return renderFlutterTryOnViewer();
+      if (widgetId === "try-on-viewer") content = renderFlutterTryOnViewer();
     }
-    return notFound();
-  }
-
-  if (category === "ios") {
+  } else if (category === "ios") {
     if (subSlug.length === 1) {
       const page = subSlug[0];
-      if (page === "installation") return renderIosInstallation();
-      if (page === "controller") return renderIosController();
-      if (page === "examples") return renderIosExamples();
+      if (page === "installation") content = renderIosInstallation();
+      else if (page === "controller") content = renderIosController();
+      else if (page === "examples") content = renderIosExamples();
     }
-    return notFound();
-  }
-
-  if (category === "android") {
+  } else if (category === "android") {
     if (subSlug.length === 1) {
       const page = subSlug[0];
-      if (page === "installation") return renderAndroidInstallation();
-      if (page === "activity") return renderAndroidActivity();
-      if (page === "examples") return renderAndroidExamples();
+      if (page === "installation") content = renderAndroidInstallation();
+      else if (page === "activity") content = renderAndroidActivity();
+      else if (page === "examples") content = renderAndroidExamples();
     }
+  }
+
+  if (!content) {
     return notFound();
   }
 
-  return notFound();
+  // Generate metadata details and schemas
+  const { title, description, canonical } = getSeoMetadata(slug);
+  const canonicalUrl = `https://docs.snapmydesign.com${canonical}`;
+  const schemas = generateJsonLd(slug, title, description, canonicalUrl);
+
+  return (
+    <>
+      {schemas.map((schema, idx) => (
+        <script
+          key={idx}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        />
+      ))}
+      {content}
+    </>
+  );
 }
 
 // 1. Render Introduction
