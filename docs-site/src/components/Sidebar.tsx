@@ -73,8 +73,7 @@ export default function Sidebar() {
     {
       groupTitle: "SDK Core Widgets",
       links: [
-        { title: "Try-On Flow", href: "/docs/flutter/widgets/try-on-viewer", icon: <Play size={16} /> },
-        { title: "BeforeAfterSlider", href: "/docs/flutter/widgets/before-after-slider", icon: <Activity size={16} /> }
+        { title: "Try-On Flow", href: "/docs/flutter/widgets/try-on-viewer", icon: <Play size={16} /> }
       ]
     },
     {
@@ -221,6 +220,9 @@ export default function Sidebar() {
           https://apisdk.snapmydesign.com/api/v1
         </code>
         <div style={{ marginTop: 12 }}>
+          Developer Console: <a href="https://sdk.snapmydesign.com" target="_blank" rel="noopener noreferrer" style={{ color: "hsl(var(--accent-cyan))" }}>sdk.snapmydesign.com</a>
+        </div>
+        <div style={{ marginTop: 8 }}>
           Support: <a href="mailto:contactus@snapmydesign.com">contactus@snapmydesign.com</a>
         </div>
       </div>

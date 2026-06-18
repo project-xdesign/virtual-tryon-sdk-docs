@@ -9,6 +9,9 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+.firebaserc
+firebase.json
+.firebase
 
 # testing
 /coverage

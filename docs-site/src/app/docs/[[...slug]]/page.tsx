@@ -45,7 +45,6 @@ export async function generateStaticParams() {
     { slug: ["flutter", "installation"] },
     { slug: ["flutter", "configuration"] },
     { slug: ["flutter", "widgets", "try-on-viewer"] },
-    { slug: ["flutter", "widgets", "before-after-slider"] },
     { slug: ["flutter", "examples"] },
 
     // iOS SDK Paths
@@ -192,7 +191,6 @@ export default async function DocsPage({ params }: PageProps) {
     if (subSlug.length === 2 && subSlug[0] === "widgets") {
       const widgetId = subSlug[1];
       if (widgetId === "try-on-viewer") return renderFlutterTryOnViewer();
-      if (widgetId === "before-after-slider") return renderFlutterBeforeAfterSlider();
     }
     return notFound();
   }
@@ -230,20 +228,20 @@ function renderIntro() {
             <Sparkles size={12} />
             AI-POWERED VIRTUAL TRY-ON
           </div>
-          
+
           <h1 className="doc-title">Snapmydesign (SMD) VTON API Documentation</h1>
-          
+
           <p className="doc-subtitle">
-            Welcome to the <strong>Snapmydesign (SMD) Virtual Try-On (VTON) API Reference</strong>. 
-            This documentation is designed to guide developers and enterprise partners through 
-            integrating our virtual try-on services into their own applications, e-commerce storefronts, 
+            Welcome to the <strong>Snapmydesign (SMD) Virtual Try-On (VTON) API Reference</strong>.
+            This documentation is designed to guide developers and enterprise partners through
+            integrating our virtual try-on services into their own applications, e-commerce storefronts,
             and pipelines.
           </p>
 
           <p className="doc-p">
-            Our VTON API allows you to upload photos of models/customers and garments, and generate 
-            highly realistic try-on results powered by cutting-edge AI models (including FLUX and Pruna AI) 
-            running on premium distributed clusters.
+            Our VTON API allows you to upload photos of models/customers and garments, and generate
+            highly realistic try-on results powered by cutting-edge AI models (including FLUX and Pruna AI)
+            running on premium distributed clusters. To learn more about our visual catalogue platforms and visual AI services, visit our main website at <a href="https://sdk.snapmydesign.com" target="_blank" rel="noopener noreferrer" style={{ color: "hsl(var(--accent-cyan))", textDecoration: "underline" }}>sdk.snapmydesign.com</a>.
           </p>
 
           <h2 className="doc-h2"><BookOpen size={20} className="text-cyan" /> Quick Reference</h2>
@@ -261,6 +259,11 @@ function renderIntro() {
                 </tr>
               </thead>
               <tbody>
+                <tr>
+                  <td className="doc-strong">Developer Console</td>
+                  <td><a href="https://sdk.snapmydesign.com" target="_blank" rel="noopener noreferrer" className="text-cyan">sdk.snapmydesign.com</a></td>
+                  <td>Generate API keys and manage subscriptions.</td>
+                </tr>
                 <tr>
                   <td className="doc-strong">API Base URL</td>
                   <td><code className="path-text">{QUICK_REFERENCE.baseUrl}</code></td>
@@ -314,6 +317,10 @@ function renderAuthentication() {
 
           <p className="doc-p">
             To authorize your request, include the following custom header in your HTTP payloads:
+          </p>
+
+          <p className="doc-p">
+            You can generate, retrieve, and manage your API keys inside the <a href="https://sdk.snapmydesign.com" target="_blank" rel="noopener noreferrer" style={{ color: "hsl(var(--accent-cyan))", textDecoration: "underline" }}>SnapIt Developer Console (sdk.snapmydesign.com)</a>.
           </p>
 
           <div className="code-panel" style={{ margin: "24px 0" }}>
@@ -595,11 +602,11 @@ function renderExamples() {
           </p>
 
           <h2 className="doc-h2"><Copy size={20} className="text-cyan" /> Integration Scripts</h2>
-          
+
           <div className="code-tabs" style={{ marginTop: 24, display: "inline-flex", borderRadius: "8px 8px 0 0", overflow: "hidden", border: "1px solid hsl(var(--border-color))", borderBottom: "none" }}>
             <span className="code-tab active">Full Flow Guides</span>
           </div>
-          
+
           <div className="calc-container" style={{ marginTop: 0, borderRadius: "0 0 12px 12px" }}>
             <p className="doc-p">
               The examples demonstrate how to:
@@ -646,6 +653,10 @@ function renderFlutterIntro() {
             <li><strong>Built-in UI Widgets:</strong> Interactive Before-After comparison slider and customizable try-on selectors.</li>
             <li><strong>State & Credit Management:</strong> Easily track credit utilization and query history with robust error boundary handling.</li>
           </ul>
+
+          <p className="doc-p" style={{ marginTop: 24 }}>
+            To explore our web catalogue tool or create a developer account, visit the <a href="https://sdk.snapmydesign.com" target="_blank" rel="noopener noreferrer" style={{ color: "hsl(var(--accent-cyan))", textDecoration: "underline" }}>Snapmydesign Main Website (snapmydesign.com)</a>.
+          </p>
         </section>
       </div>
     </div>
@@ -659,7 +670,7 @@ function renderFlutterInstallation() {
         <section className="doc-section">
           <h1 className="doc-title">Flutter SDK Installation</h1>
           <p className="doc-subtitle">Include the SnapIt SDK dependency inside your mobile projects from pub.dev.</p>
-          
+
           <p className="doc-p">
             You can install the official package directly from{" "}
             <a href="https://pub.dev/packages/snapit_sdk" target="_blank" rel="noopener noreferrer" className="text-cyan doc-strong">
@@ -691,7 +702,7 @@ function renderFlutterInstallation() {
               </pre>
             </div>
           </div>
-          
+
           <p className="doc-p">Then fetch the dependencies in your terminal:</p>
           <div className="code-panel">
             <pre className="code-block">
@@ -745,7 +756,7 @@ final customTheme = SnapITTheme(
           <p className="doc-p">
             If you want to invoke VTON rendering or upload assets programmatically without displaying the default user interface flow, instantiate a <code>SnapITClient</code>:
           </p>
-          
+
           <div className="code-panel" style={{ margin: "24px 0" }}>
             <div className="code-tabs">
               <span className="code-tab active">client_example.dart</span>
@@ -798,35 +809,6 @@ SnapIT.launchTryOnFlow(
     print("Try-On Failed: $errorMessage");
   },
 );`}</code>
-              </pre>
-            </div>
-          </div>
-        </section>
-      </div>
-    </div>
-  );
-}
-
-function renderFlutterBeforeAfterSlider() {
-  return (
-    <div className="main-layout" style={{ gridTemplateColumns: "1fr" }}>
-      <div className="content-wrapper">
-        <section className="doc-section">
-          <h1 className="doc-title">BeforeAfterSlider Widget</h1>
-          <p className="doc-subtitle">A gorgeous slider UI for side-by-side model comparison.</p>
-          <p className="doc-p">Lets users drag a divider handle to slide between the raw model and the final virtual try-on output.</p>
-
-          <div className="code-panel" style={{ margin: "24px 0" }}>
-            <div className="code-tabs">
-              <span className="code-tab active">Usage Example</span>
-            </div>
-            <div className="code-content-wrapper">
-              <pre className="code-block">
-                <code>{`BeforeAfterSlider(
-  beforeImageUrl: "https://apisdk.snapmydesign.com/sample/model.png",
-  afterImageUrl: "https://apisdk.snapmydesign.com/sample/result.png",
-  handleColor: Colors.white,
-)`}</code>
               </pre>
             </div>
           </div>
@@ -901,9 +883,9 @@ class _VtonScreenState extends State<VtonScreen> {
         child: _isLoading 
           ? const CircularProgressIndicator()
           : _outputUrl != null 
-            ? BeforeAfterSlider(
-                beforeImageUrl: "https://apisdk.snapmydesign.com/sample/model.png",
-                afterImageUrl: _outputUrl!,
+            ? Image.network(
+                _outputUrl!,
+                fit: BoxFit.contain,
               )
             : ElevatedButton(
                 onPressed: _runGeneration,
@@ -939,6 +921,9 @@ function renderIosIntro() {
           <p className="doc-subtitle">Native Swift library designed for Apple iOS platforms.</p>
           <p className="doc-p">
             The SnapIt iOS SDK provides clean Swift extensions, custom controllers, and network models optimized for Swift concurrency.
+          </p>
+          <p className="doc-p" style={{ marginTop: 24 }}>
+            To explore our web catalogue tool or create a developer account, visit the <a href="https://sdk.snapmydesign.com" target="_blank" rel="noopener noreferrer" style={{ color: "hsl(var(--accent-cyan))", textDecoration: "underline" }}>Snapmydesign Main Website (snapmydesign.com)</a>.
           </p>
         </section>
       </div>
@@ -1060,6 +1045,9 @@ function renderAndroidIntro() {
           <p className="doc-subtitle">Kotlin-optimized SDK for native Android integrations.</p>
           <p className="doc-p">
             Integrate virtual try-on engines directly into layouts, fragments, or modern Jetpack Compose flows.
+          </p>
+          <p className="doc-p" style={{ marginTop: 24 }}>
+            To explore our web catalogue tool or create a developer account, visit the <a href="https://sdk.snapmydesign.com" target="_blank" rel="noopener noreferrer" style={{ color: "hsl(var(--accent-cyan))", textDecoration: "underline" }}>Snapmydesign Main Website (snapmydesign.com)</a>.
           </p>
         </section>
       </div>

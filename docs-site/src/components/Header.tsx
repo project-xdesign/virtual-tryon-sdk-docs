@@ -24,7 +24,7 @@ export default function Header() {
         {/* Left: Brand logo */}
         <Link href="/docs/api" className="header-logo">
           <img
-            src="https://snapmydesign.com/logo-1225.webp"
+            src="https://sdk.snapmydesign.com/logo-1225.webp"
             alt="SnapIt Logo"
             className="logo-img"
           />
