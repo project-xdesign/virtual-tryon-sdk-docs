@@ -20,6 +20,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/docs/api/errors/",
     "/docs/api/examples/",
     
+    "/docs/npm/",
+    "/docs/npm/installation/",
+    "/docs/npm/client-reference/",
+    "/docs/npm/errors/",
+    "/docs/npm/examples/",
+    
     "/docs/flutter/",
     "/docs/flutter/installation/",
     "/docs/flutter/configuration/",

@@ -22,13 +22,15 @@ export default function Sidebar() {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Determine current documentation category dynamically from url pathname
-  let currentCategory: "api" | "flutter" | "ios" | "android" = "api";
+  let currentCategory: "api" | "flutter" | "ios" | "android" | "npm" = "api";
   if (pathname.includes("/docs/flutter")) {
     currentCategory = "flutter";
   } else if (pathname.includes("/docs/ios")) {
     currentCategory = "ios";
   } else if (pathname.includes("/docs/android")) {
     currentCategory = "android";
+  } else if (pathname.includes("/docs/npm")) {
+    currentCategory = "npm";
   }
 
   // Navigation configurations for each category
@@ -57,6 +59,29 @@ export default function Sidebar() {
         { title: "Model & Credit Matrix", href: "/docs/api/credit-matrix", icon: <BarChart2 size={16} /> },
         { title: "Error Handling", href: "/docs/api/errors", icon: <ShieldAlert size={16} /> },
         { title: "Code Examples", href: "/docs/api/examples", icon: <Code2 size={16} /> }
+      ]
+    }
+  ];
+
+  const npmNavigation: NavGroup[] = [
+    {
+      groupTitle: "Getting Started",
+      links: [
+        { title: "Introduction", href: "/docs/npm", icon: <BookOpen size={16} /> },
+        { title: "Installation & Setup", href: "/docs/npm/installation", icon: <CloudUpload size={16} /> }
+      ]
+    },
+    {
+      groupTitle: "Usage Reference",
+      links: [
+        { title: "Client API Reference", href: "/docs/npm/client-reference", icon: <Play size={16} /> },
+        { title: "Error Handling", href: "/docs/npm/errors", icon: <ShieldAlert size={16} /> }
+      ]
+    },
+    {
+      groupTitle: "Examples",
+      links: [
+        { title: "Full Integration Flow", href: "/docs/npm/examples", icon: <Code2 size={16} /> }
       ]
     }
   ];
@@ -133,6 +158,7 @@ export default function Sidebar() {
     currentCategory === "flutter" ? flutterNavigation :
     currentCategory === "ios" ? iosNavigation :
     currentCategory === "android" ? androidNavigation :
+    currentCategory === "npm" ? npmNavigation :
     apiNavigation;
 
   // Filter links based on search query

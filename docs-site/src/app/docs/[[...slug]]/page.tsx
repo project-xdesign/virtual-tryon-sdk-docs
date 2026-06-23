@@ -40,6 +40,13 @@ export async function generateStaticParams() {
     { slug: ["errors"] },
     { slug: ["examples"] },
 
+    // NPM SDK Paths
+    { slug: ["npm"] },
+    { slug: ["npm", "installation"] },
+    { slug: ["npm", "client-reference"] },
+    { slug: ["npm", "errors"] },
+    { slug: ["npm", "examples"] },
+
     // Flutter SDK Paths
     { slug: ["flutter"] },
     { slug: ["flutter", "installation"] },
@@ -67,7 +74,7 @@ function getSeoMetadata(slug: string[]): { title: string; description: string; c
   let subSlug = slug;
 
   if (slug.length > 0) {
-    if (["api", "flutter", "ios", "android"].includes(slug[0])) {
+    if (["api", "flutter", "ios", "android", "npm"].includes(slug[0])) {
       category = slug[0];
       subSlug = slug.slice(1);
     } else {
@@ -108,6 +115,26 @@ function getSeoMetadata(slug: string[]): { title: string; description: string; c
       if (endpoint) {
         title = `${endpoint.title} (${endpoint.method} ${endpoint.path}) | Snapmydesign API Reference`;
         description = endpoint.description;
+      }
+    }
+  } else if (category === "npm") {
+    if (subSlug.length === 0) {
+      title = "NPM JavaScript/TypeScript SDK for Virtual Try-On | Snapmydesign Docs";
+      description = "Official JavaScript/TypeScript SDK for the Snapmydesign Virtual Try-On API with Node.js and browser support.";
+    } else if (subSlug.length === 1) {
+      const page = subSlug[0];
+      if (page === "installation") {
+        title = "NPM SDK Installation & Client Setup | Snapmydesign VTON Docs";
+        description = "Install the snapit_sdk package and configure the VTONClient with developer credentials or environment variables.";
+      } else if (page === "client-reference") {
+        title = "VTONClient SDK API Reference | Snapmydesign VTON Docs";
+        description = "Detailed API reference for VTONClient methods including health check, image upload, try-on generation, and credit checks.";
+      } else if (page === "errors") {
+        title = "NPM SDK Custom Error Classes & Exceptions | Snapmydesign VTON Docs";
+        description = "Understand custom exception classes, HTTP status mapping, and credit depletion errors in the snapit_sdk NPM package.";
+      } else if (page === "examples") {
+        title = "NPM SDK Full Integration Examples | Snapmydesign VTON Docs";
+        description = "Step-by-step runnable example code showing end-to-end VTON generation in Node.js and TypeScript.";
       }
     }
   } else if (category === "flutter") {
@@ -198,7 +225,7 @@ function generateJsonLd(slug: string[], title: string, description: string, cano
   let subSlug = slug;
 
   if (slug.length > 0) {
-    if (["api", "flutter", "ios", "android"].includes(slug[0])) {
+    if (["api", "flutter", "ios", "android", "npm"].includes(slug[0])) {
       category = slug[0];
       subSlug = slug.slice(1);
     } else {
@@ -218,7 +245,7 @@ function generateJsonLd(slug: string[], title: string, description: string, cano
   ];
 
   if (category !== "api") {
-    const categoryName = category.charAt(0).toUpperCase() + category.slice(1) + " SDK";
+    const categoryName = category === "npm" ? "NPM SDK" : category.charAt(0).toUpperCase() + category.slice(1) + " SDK";
     baseBreadcrumbs.push({
       "@type": "ListItem",
       "position": 2,
@@ -319,15 +346,15 @@ function generateJsonLd(slug: string[], title: string, description: string, cano
         "documentation": canonicalUrl
       };
     }
-  } else if (["flutter", "ios", "android"].includes(category) && subSlug.includes("examples")) {
+  } else if (["flutter", "ios", "android", "npm"].includes(category) && subSlug.includes("examples")) {
     mainSchema = {
       "@context": "https://schema.org",
       "@type": "SoftwareSourceCode",
       "name": title,
       "description": description,
       "codeSampleType": "full app integration snippet",
-      "programmingLanguage": category === "flutter" ? "Dart" : category === "ios" ? "Swift" : "Kotlin",
-      "runtimePlatform": category === "flutter" ? "Flutter" : category === "ios" ? "iOS" : "Android",
+      "programmingLanguage": category === "npm" ? "JavaScript/TypeScript" : category === "flutter" ? "Dart" : category === "ios" ? "Swift" : "Kotlin",
+      "runtimePlatform": category === "npm" ? "Node.js / Browser" : category === "flutter" ? "Flutter" : category === "ios" ? "iOS" : "Android",
       "author": {
         "@type": "Organization",
         "name": "Snapmydesign"
@@ -389,7 +416,7 @@ export default async function DocsPage({ params }: PageProps) {
   let subSlug = slug;
 
   if (slug.length > 0) {
-    if (["api", "flutter", "ios", "android"].includes(slug[0])) {
+    if (["api", "flutter", "ios", "android", "npm"].includes(slug[0])) {
       category = slug[0];
       subSlug = slug.slice(1);
     }
@@ -400,9 +427,18 @@ export default async function DocsPage({ params }: PageProps) {
   // Handle empty sub-path introduction pages
   if (subSlug.length === 0) {
     if (category === "api") content = renderIntro();
+    else if (category === "npm") content = renderNpmIntro();
     else if (category === "flutter") content = renderFlutterIntro();
     else if (category === "ios") content = renderIosIntro();
     else if (category === "android") content = renderAndroidIntro();
+  } else if (category === "npm") {
+    if (subSlug.length === 1) {
+      const page = subSlug[0];
+      if (page === "installation") content = renderNpmInstallation();
+      else if (page === "client-reference") content = renderNpmClientReference();
+      else if (page === "errors") content = renderNpmErrors();
+      else if (page === "examples") content = renderNpmExamples();
+    }
   } else if (category === "api") {
     // Handle sub-pages
     if (subSlug.length === 1) {
@@ -511,7 +547,7 @@ function renderIntro() {
               <tbody>
                 <tr>
                   <td className="doc-strong">Developer Console</td>
-                  <td><a href="https://sdk.snapmydesign.com" target="_blank" rel="noopener noreferrer" className="text-cyan">sdk.snapmydesign.com</a></td>
+                  <td><a href="https://console.snapmydesign.com" target="_blank" rel="noopener noreferrer" className="text-cyan">console.snapmydesign.com</a></td>
                   <td>Generate API keys and manage subscriptions.</td>
                 </tr>
                 <tr>
@@ -570,7 +606,7 @@ function renderAuthentication() {
           </p>
 
           <p className="doc-p">
-            You can generate, retrieve, and manage your API keys inside the <a href="https://sdk.snapmydesign.com" target="_blank" rel="noopener noreferrer" style={{ color: "hsl(var(--accent-cyan))", textDecoration: "underline" }}>SnapIt Developer Console (sdk.snapmydesign.com)</a>.
+            You can generate, retrieve, and manage your API keys inside the <a href="https://console.snapmydesign.com" target="_blank" rel="noopener noreferrer" style={{ color: "hsl(var(--accent-cyan))", textDecoration: "underline" }}>SnapIt Developer Console (console.snapmydesign.com)</a>.
           </p>
 
           <div className="code-panel" style={{ margin: "24px 0" }}>
@@ -904,9 +940,48 @@ function renderFlutterIntro() {
             <li><strong>State & Credit Management:</strong> Easily track credit utilization and query history with robust error boundary handling.</li>
           </ul>
 
-          <p className="doc-p" style={{ marginTop: 24 }}>
-            To explore our web catalogue tool or create a developer account, visit the <a href="https://sdk.snapmydesign.com" target="_blank" rel="noopener noreferrer" style={{ color: "hsl(var(--accent-cyan))", textDecoration: "underline" }}>Snapmydesign Main Website (snapmydesign.com)</a>.
-          </p>
+          <h2 className="doc-h2"><BookOpen size={20} className="text-cyan" /> Official Resources</h2>
+          <div className="table-container">
+            <table className="doc-table">
+              <thead>
+                <tr>
+                  <th>Resource</th>
+                  <th>Link</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="doc-strong">Pub.dev Registry</td>
+                  <td><a href="https://pub.dev/packages/snapit_sdk" target="_blank" rel="noopener noreferrer" className="text-cyan">pub.dev/packages/snapit_sdk</a></td>
+                  <td>Official SDK package on pub.dev.</td>
+                </tr>
+                <tr>
+                  <td className="doc-strong">Official Website</td>
+                  <td><a href="https://sdk.snapmydesign.com" target="_blank" rel="noopener noreferrer" className="text-cyan">sdk.snapmydesign.com</a></td>
+                  <td>Explore SMD visual AI features and capabilities.</td>
+                </tr>
+                <tr>
+                  <td className="doc-strong">Developer Console</td>
+                  <td><a href="https://console.snapmydesign.com" target="_blank" rel="noopener noreferrer" className="text-cyan">console.snapmydesign.com</a></td>
+                  <td>Generate API keys and manage subscriptions.</td>
+                </tr>
+                <tr>
+                  <td className="doc-strong">Documentation Portal</td>
+                  <td><a href="https://docs.snapmydesign.com" target="_blank" rel="noopener noreferrer" className="text-cyan">docs.snapmydesign.com</a></td>
+                  <td>Complete guide to API features and parameters.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div className="alert-box tip">
+            <CheckCircle2 />
+            <div>
+              <div className="alert-title">Get Started</div>
+              Install the Flutter package and start building! Check out the <a href="/docs/flutter/installation" className="text-cyan doc-strong">Installation Guide</a>.
+            </div>
+          </div>
         </section>
       </div>
     </div>
@@ -1173,7 +1248,7 @@ function renderIosIntro() {
             The SnapIt iOS SDK provides clean Swift extensions, custom controllers, and network models optimized for Swift concurrency.
           </p>
           <p className="doc-p" style={{ marginTop: 24 }}>
-            To explore our web catalogue tool or create a developer account, visit the <a href="https://sdk.snapmydesign.com" target="_blank" rel="noopener noreferrer" style={{ color: "hsl(var(--accent-cyan))", textDecoration: "underline" }}>Snapmydesign Main Website (snapmydesign.com)</a>.
+            To explore our web catalogue tool or create a developer account, visit the <a href="https://console.snapmydesign.com" target="_blank" rel="noopener noreferrer" style={{ color: "hsl(var(--accent-cyan))", textDecoration: "underline" }}>Snapmydesign Developer Console (console.snapmydesign.com)</a>.
           </p>
         </section>
       </div>
@@ -1297,7 +1372,7 @@ function renderAndroidIntro() {
             Integrate virtual try-on engines directly into layouts, fragments, or modern Jetpack Compose flows.
           </p>
           <p className="doc-p" style={{ marginTop: 24 }}>
-            To explore our web catalogue tool or create a developer account, visit the <a href="https://sdk.snapmydesign.com" target="_blank" rel="noopener noreferrer" style={{ color: "hsl(var(--accent-cyan))", textDecoration: "underline" }}>Snapmydesign Main Website (snapmydesign.com)</a>.
+            To explore our web catalogue tool or create a developer account, visit the <a href="https://console.snapmydesign.com" target="_blank" rel="noopener noreferrer" style={{ color: "hsl(var(--accent-cyan))", textDecoration: "underline" }}>Snapmydesign Developer Console (console.snapmydesign.com)</a>.
           </p>
         </section>
       </div>
@@ -1394,6 +1469,422 @@ fun ProductDetailScreen() {
         }
     )
 }`}</code>
+              </pre>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+/* ==========================================================================
+   NPM SDK DOC RENDERS
+   ========================================================================== */
+
+function renderNpmIntro() {
+  return (
+    <div className="main-layout" style={{ gridTemplateColumns: "1fr" }}>
+      <div className="content-wrapper">
+        <section className="doc-section">
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "4px 10px", borderRadius: 20, backgroundColor: "rgba(0, 242, 254, 0.08)", border: "1px solid rgba(0, 242, 254, 0.2)", fontSize: "0.75rem", color: "hsl(var(--accent-cyan))", fontWeight: 700, marginBottom: 16 }}>
+            <Sparkles size={12} />
+            JAVASCRIPT & TYPESCRIPT SDK
+          </div>
+          <h1 className="doc-title">SnapIt NPM VTON SDK</h1>
+          <p className="doc-subtitle">
+            The official JavaScript/TypeScript SDK for the <strong>Snapmydesign (SMD) Virtual Try-On (VTON) API</strong>.
+          </p>
+          <p className="doc-p">
+            This SDK simplifies integrating Snapmydesign's virtual try-on pipelines into browser-based applications and Node.js environments (v18+). It provides:
+          </p>
+          <ul className="doc-list">
+            <li><strong>Zero Dependencies:</strong> Built with native fetch compatibility to keep your bundle size minimal.</li>
+            <li><strong>Full TypeScript Support:</strong> Rich interface typings out of the box.</li>
+            <li><strong>Universal Environment Compatibility:</strong> Works seamlessly in server environments, Serverless functions, React/Next.js applications, and browser runtimes.</li>
+          </ul>
+
+          <h2 className="doc-h2"><BookOpen size={20} className="text-cyan" /> Official Resources</h2>
+          <div className="table-container">
+            <table className="doc-table">
+              <thead>
+                <tr>
+                  <th>Resource</th>
+                  <th>Link</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="doc-strong">NPM Registry</td>
+                  <td><a href="https://www.npmjs.com/package/snapit_sdk" target="_blank" rel="noopener noreferrer" className="text-cyan">npmjs.com/package/snapit_sdk</a></td>
+                  <td>Official SDK package on npmjs.com.</td>
+                </tr>
+                <tr>
+                  <td className="doc-strong">Official Website</td>
+                  <td><a href="https://sdk.snapmydesign.com" target="_blank" rel="noopener noreferrer" className="text-cyan">sdk.snapmydesign.com</a></td>
+                  <td>Explore SMD visual AI features and capabilities.</td>
+                </tr>
+                <tr>
+                  <td className="doc-strong">Developer Console</td>
+                  <td><a href="https://console.snapmydesign.com" target="_blank" rel="noopener noreferrer" className="text-cyan">console.snapmydesign.com</a></td>
+                  <td>Generate API keys and track usage.</td>
+                </tr>
+                <tr>
+                  <td className="doc-strong">Documentation Portal</td>
+                  <td><a href="https://docs.snapmydesign.com" target="_blank" rel="noopener noreferrer" className="text-cyan">docs.snapmydesign.com</a></td>
+                  <td>Complete guide to API features and parameters.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div className="alert-box tip">
+            <CheckCircle2 />
+            <div>
+              <div className="alert-title">Get Started</div>
+              Install the npm package and start testing right away! Head over to the <a href="/docs/npm/installation" className="text-cyan doc-strong">Installation & Setup</a> page.
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function renderNpmInstallation() {
+  return (
+    <div className="main-layout" style={{ gridTemplateColumns: "1fr" }}>
+      <div className="content-wrapper">
+        <section className="doc-section">
+          <h1 className="doc-title">Installation & Client Setup</h1>
+          <p className="doc-subtitle">Add the SDK package to your project and initialize the VTONClient.</p>
+
+          <h2 className="doc-h2">1. Installation</h2>
+          <p className="doc-p">
+            Install the official <a href="https://www.npmjs.com/package/snapit_sdk" target="_blank" rel="noopener noreferrer" className="text-cyan doc-strong">snapit_sdk</a> package from the NPM registry:
+          </p>
+          <div className="code-panel" style={{ margin: "16px 0 24px" }}>
+            <pre className="code-block">
+              <code>npm install snapit_sdk</code>
+            </pre>
+          </div>
+
+          <h2 className="doc-h2">2. Environment Configuration</h2>
+          <p className="doc-p">
+            To use the SDK, you need an API key (`smd_live_...`) and your developer User ID, which you can obtain from the <a href="https://console.snapmydesign.com" target="_blank" rel="noopener noreferrer" className="text-cyan">Developer Console</a>.
+          </p>
+          <p className="doc-p">
+            Define the following environment variables in your project root `.env` file:
+          </p>
+          <div className="code-panel" style={{ margin: "16px 0 24px" }}>
+            <div className="code-tabs">
+              <span className="code-tab active">.env</span>
+            </div>
+            <div className="code-content-wrapper">
+              <pre className="code-block">
+                <code>{`SMD_API_KEY=smd_live_your_key_here
+SMD_USER_ID=your_developer_user_id`}</code>
+              </pre>
+            </div>
+          </div>
+
+          <h2 className="doc-h2">3. Initialize VTONClient</h2>
+          <p className="doc-p">
+            Initialize the client either by explicitly passing the API key, or let the SDK automatically load it from your environment variables.
+          </p>
+          <div className="code-panel" style={{ margin: "16px 0 24px" }}>
+            <div className="code-tabs">
+              <span className="code-tab active">TypeScript / JavaScript</span>
+            </div>
+            <div className="code-content-wrapper">
+              <pre className="code-block">
+                <code>{`import { VTONClient } from 'snapit_sdk';
+
+// Option A: Explicit Configuration
+const client = new VTONClient({
+  apiKey: 'smd_live_your_api_key_here',
+  // baseUrl: 'https://apisdk.snapmydesign.com/api/v1' // Optional base override
+});
+
+// Option B: Auto-load from Environment variables (process.env.SMD_API_KEY)
+const clientFromEnv = new VTONClient();`}</code>
+              </pre>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function renderNpmClientReference() {
+  return (
+    <div className="main-layout" style={{ gridTemplateColumns: "1fr" }}>
+      <div className="content-wrapper">
+        <section className="doc-section">
+          <h1 className="doc-title">Client API Reference</h1>
+          <p className="doc-subtitle">Detailed documentation for VTONClient methods and schemas.</p>
+
+          <h2 className="doc-h2"><Sparkles size={20} className="text-cyan" /> VTON Services</h2>
+
+          <h3 className="doc-h3"><code>client.healthCheck()</code></h3>
+          <p className="doc-p">Verifies the status and availability of the SMD VTON services.</p>
+          <div className="code-panel" style={{ margin: "12px 0 24px" }}>
+            <div className="code-content-wrapper">
+              <pre className="code-block">
+                <code>{`const response = await client.healthCheck();
+// Returns Promise<HealthCheckResponse>`}</code>
+              </pre>
+            </div>
+          </div>
+
+          <h3 className="doc-h3"><code>client.uploadImages(userId, files, resolution)</code></h3>
+          <p className="doc-p">Uploads local or binary image files (person/model profiles, garment photos) to obtain secure public cloud storage URLs required for try-on rendering.</p>
+          <ul className="doc-list" style={{ marginLeft: 20 }}>
+            <li><strong>userId</strong> <code>string</code>: Must match the account identifier of the API key owner.</li>
+            <li><strong>files</strong> <code>UploadFile[]</code>: Array containing file paths (Node.js only), Browser Files, Blobs, Buffers, or custom structured objects: <code>{`{ data: Buffer | Blob | ArrayBuffer, name: string, type?: string }`}</code>.</li>
+            <li><strong>resolution</strong> <code>number</code> (Optional): Target resolution limit. Default is <code>1000</code>.</li>
+          </ul>
+          <div className="code-panel" style={{ margin: "12px 0 24px" }}>
+            <div className="code-content-wrapper">
+              <pre className="code-block">
+                <code>{`const uploadRes = await client.uploadImages('user_abc123', [
+  './person.jpg',
+  './tshirt.png'
+]);`}</code>
+              </pre>
+            </div>
+          </div>
+
+          <h3 className="doc-h3"><code>client.generateTryOn(request)</code></h3>
+          <p className="doc-p">Triggers the virtual try-on engine pipeline (asynchronous process returned synchronously when rendering finishes).</p>
+          <ul className="doc-list" style={{ marginLeft: 20 }}>
+            <li><strong>request</strong> <code>VTONRequest</code>:
+              <ul style={{ marginLeft: 20, marginTop: 4 }}>
+                <li><code>model_name</code> (Required): <code>"fast" | "medium" | "quality"</code>.</li>
+                <li><code>inputClothesImageUrls</code> (Required): Array of garment image URLs.</li>
+                <li><code>inputPersonImageUrls</code> (Optional): Array of reference model/person URLs.</li>
+                <li><code>prompt</code> (Optional): Custom VTON prompt description.</li>
+                <li><code>version</code> (Optional): Engine model version (default <code>1.0</code>).</li>
+                <li><code>productId</code> (Optional): Tracking SKU.</li>
+                <li><code>externalUserId</code> (Optional): Unique user ID of your client base.</li>
+                <li><code>metadata</code> (Optional): Key-value pairs dictionary.</li>
+              </ul>
+            </li>
+          </ul>
+          <div className="code-panel" style={{ margin: "12px 0 24px" }}>
+            <div className="code-content-wrapper">
+              <pre className="code-block">
+                <code>{`const result = await client.generateTryOn({
+  model_name: 'quality',
+  inputClothesImageUrls: ['https://assets.../garment.png'],
+  inputPersonImageUrls: ['https://assets.../person.jpg']
+});`}</code>
+              </pre>
+            </div>
+          </div>
+
+          <h3 className="doc-h3"><code>client.getHistory(params)</code></h3>
+          <p className="doc-p">Queries historical executions logs for audit and analytics.</p>
+          <div className="code-panel" style={{ margin: "12px 0 24px" }}>
+            <div className="code-content-wrapper">
+              <pre className="code-block">
+                <code>{`const history = await client.getHistory({ userId: 'user_123', limit: 10 });`}</code>
+              </pre>
+            </div>
+          </div>
+
+          <h2 className="doc-h2"><Key size={20} className="text-purple" /> User & API Key Management</h2>
+          <p className="doc-p">The SDK also features administrative endpoints to manage users, profile details, check credits, list/revoke API keys, and track subscriptions:</p>
+          <ul className="doc-list">
+            <li><code>client.getUserCredits(userId)</code> - Fetch remaining credit balance.</li>
+            <li><code>client.registerUser(user)</code> - Create new developer profiles.</li>
+            <li><code>client.getProfileDetails(userId)</code> - Retrieve account details and tier info.</li>
+            <li><code>client.updateProfile(userId, profile)</code> - Update developer profile contact info.</li>
+            <li><code>client.deleteAccount(userId)</code> - Wipe all account assets and history.</li>
+            <li><code>client.getSubscriptionStatus(userId)</code> - Inspect subscription plan status.</li>
+            <li><code>client.generateApiKey(userId, label)</code> - Generate a new authentication token.</li>
+            <li><code>client.listApiKeys(userId)</code> - Enumerate active API keys.</li>
+            <li><code>client.revokeApiKey(userId, keyId)</code> - Revoke and disable an API key.</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function renderNpmErrors() {
+  return (
+    <div className="main-layout" style={{ gridTemplateColumns: "1fr" }}>
+      <div className="content-wrapper">
+        <section className="doc-section">
+          <h1 className="doc-title">⚠️ Error Handling</h1>
+          <p className="doc-subtitle">Understand VTON SDK exceptions, error structures, and HTTP mappings.</p>
+
+          <h2 className="doc-h2">Exception Mapping</h2>
+          <p className="doc-p">
+            The SDK exposes custom error classes corresponding to the different API response statuses. When an API call fails, the client throws the matching custom exception class so you can handle specific error codes cleanly in try-catch statements.
+          </p>
+
+          <div className="table-container">
+            <table className="doc-table">
+              <thead>
+                <tr>
+                  <th>SDK Error Class</th>
+                  <th>HTTP Code</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="doc-strong"><code>InvalidAPIKeyError</code></td>
+                  <td><code className="text-orange">401</code></td>
+                  <td>API Key is missing, incorrectly formatted, or has been revoked.</td>
+                </tr>
+                <tr>
+                  <td className="doc-strong"><code>UnauthorizedError</code></td>
+                  <td><code className="text-orange">403</code></td>
+                  <td>Request payload user ID does not match the API Key's developer account owner.</td>
+                </tr>
+                <tr>
+                  <td className="doc-strong"><code>UserNotFoundError</code></td>
+                  <td><code className="text-orange">404</code></td>
+                  <td>Specified developer user ID doesn't exist.</td>
+                </tr>
+                <tr>
+                  <td className="doc-strong"><code>APIKeyNotFoundError</code></td>
+                  <td><code className="text-orange">404</code></td>
+                  <td>The system failed to match the API Key verification query.</td>
+                </tr>
+                <tr>
+                  <td className="doc-strong"><code>InsufficientCreditsError</code></td>
+                  <td><code className="text-orange">501</code></td>
+                  <td>Account credit balance is lower than the model credit cost.</td>
+                </tr>
+                <tr>
+                  <td className="doc-strong"><code>VTONServerError</code></td>
+                  <td><code className="text-orange">5xx</code></td>
+                  <td>Backend processing or rendering servers failed or timed out.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2 className="doc-h2">Handling Errors</h2>
+          <p className="doc-p">Use instance checks in catch blocks to handle specific edge conditions like credit depletion:</p>
+          <div className="code-panel">
+            <div className="code-tabs">
+              <span className="code-tab active">exception_handling.ts</span>
+            </div>
+            <div className="code-content-wrapper">
+              <pre className="code-block">
+                <code>{`import { VTONClient, InsufficientCreditsError, InvalidAPIKeyError } from 'snapit_sdk';
+
+const client = new VTONClient();
+
+try {
+  const result = await client.generateTryOn({
+    model_name: 'quality',
+    inputClothesImageUrls: ['https://assets.../garment.png']
+  });
+} catch (error) {
+  if (error instanceof InsufficientCreditsError) {
+    console.error('Operation failed: Please buy more credit top-ups.');
+  } else if (error instanceof InvalidAPIKeyError) {
+    console.error('Unauthorized: Check your environment SMD_API_KEY value.');
+  } else {
+    console.error('SDK request failed:', error.message);
+  }
+}`}</code>
+              </pre>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function renderNpmExamples() {
+  return (
+    <div className="main-layout" style={{ gridTemplateColumns: "1fr" }}>
+      <div className="content-wrapper">
+        <section className="doc-section">
+          <h1 className="doc-title">Full Integration Example</h1>
+          <p className="doc-subtitle">Runnable end-to-end VTON integration flow in Node.js.</p>
+          <p className="doc-p">
+            This script covers checking service health, checking remaining credits, uploading reference image files, triggering a try-on generation, and logging the output image.
+          </p>
+
+          <div className="code-panel">
+            <div className="code-tabs">
+              <span className="code-tab active">run_vton.ts</span>
+            </div>
+            <div className="code-content-wrapper">
+              <pre className="code-block">
+                <code>{`import { VTONClient, InsufficientCreditsError } from 'snapit_sdk';
+
+const client = new VTONClient({ apiKey: 'smd_live_your_key_here' });
+
+async function runTryOnWorkflow() {
+  try {
+    const developerUserId = 'user_abc123';
+
+    // 1. Verify VTON health status
+    console.log('Checking service health...');
+    const health = await client.healthCheck();
+    if (!health.success) {
+      console.warn('VTON service is currently degraded.');
+      return;
+    }
+
+    // 2. Audit credits
+    const balance = await client.getUserCredits(developerUserId);
+    console.log('Current credit balance:', balance.credits.credits);
+
+    // 3. Upload model and clothes images
+    // Note: Local paths are supported in Node.js environments.
+    // In browser/serverless, pass File/Blob binary objects instead.
+    console.log('Uploading reference garments and model photos...');
+    const uploadRes = await client.uploadImages(developerUserId, [
+      './person.jpg',
+      './tshirt.png'
+    ], 1000);
+
+    const urls = uploadRes.uploaded.map(item => item.url);
+    console.log('Uploaded assets URLs:', urls);
+
+    // 4. Trigger try-on generation
+    console.log('Generating Try-On rendering...');
+    const generation = await client.generateTryOn({
+      model_name: 'quality', // 'fast' (0.25 credits), 'medium' (0.50 credits), or 'quality' (1.00 credits)
+      inputClothesImageUrls: [urls[1]],
+      inputPersonImageUrls: [urls[0]],
+      prompt: 'Put the tshirt on the model',
+      version: 1.1,
+      productId: 'sku_9921_blue',
+      metadata: {
+        campaign: 'summer_sale_2026'
+      }
+    });
+
+    if (generation.success) {
+      console.log('Virtual try-on completed successfully!');
+      console.log('Output Image URL:', generation.outputImageUrls[0]);
+      console.log('Transaction Charge:', generation.creditCost, 'credits');
+      console.log('Generation UUID:', generation.generationId);
+    }
+  } catch (error) {
+    if (error instanceof InsufficientCreditsError) {
+      console.error('VTON error: Developer credits are insufficient.');
+    } else {
+      console.error('VTON error:', error.message);
+    }
+  }
+}
+
+runTryOnWorkflow();`}</code>
               </pre>
             </div>
           </div>
