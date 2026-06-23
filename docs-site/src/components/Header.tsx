@@ -9,13 +9,15 @@ export default function Header() {
   const pathname = usePathname();
 
   // Determine current documentation category dynamically from url pathname
-  let currentCategory: "api" | "flutter" | "ios" | "android" = "api";
+  let currentCategory: "api" | "flutter" | "ios" | "android" | "npm" = "api";
   if (pathname.includes("/docs/flutter")) {
     currentCategory = "flutter";
   } else if (pathname.includes("/docs/ios")) {
     currentCategory = "ios";
   } else if (pathname.includes("/docs/android")) {
     currentCategory = "android";
+  } else if (pathname.includes("/docs/npm")) {
+    currentCategory = "npm";
   }
 
   return (
@@ -42,6 +44,12 @@ export default function Header() {
             className={`header-tab-pill ${currentCategory === "api" ? "active" : ""}`}
           >
             API Reference
+          </Link>
+          <Link
+            href="/docs/npm"
+            className={`header-tab-pill ${currentCategory === "npm" ? "active" : ""}`}
+          >
+            NPM SDK
           </Link>
           <Link
             href="/docs/flutter"
