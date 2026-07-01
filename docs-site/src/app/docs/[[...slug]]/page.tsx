@@ -475,24 +475,28 @@ function renderPagination(prevPage: { title: string; href: string } | null, next
 function injectPagination(content: React.ReactNode, prevPage: any, nextPage: any): React.ReactNode {
   if (!React.isValidElement(content)) return content;
 
-  const childrenArray = React.Children.toArray(content.props.children);
+  const element = content as React.ReactElement<any>;
+  const childrenArray = React.Children.toArray(element.props.children);
   const updatedChildren = childrenArray.map((child) => {
-    if (React.isValidElement(child) && child.props.className === "content-wrapper") {
-      return React.cloneElement(child, {
-        ...child.props,
-        children: [
-          ...React.Children.toArray(child.props.children),
-          renderPagination(prevPage, nextPage)
-        ]
-      } as any);
+    if (React.isValidElement(child)) {
+      const childEl = child as React.ReactElement<any>;
+      if (childEl.props.className === "content-wrapper") {
+        return React.cloneElement(childEl, {
+          ...childEl.props,
+          children: [
+            ...React.Children.toArray(childEl.props.children),
+            renderPagination(prevPage, nextPage)
+          ]
+        });
+      }
     }
     return child;
   });
 
-  return React.cloneElement(content, {
-    ...content.props,
+  return React.cloneElement(element, {
+    ...element.props,
     children: updatedChildren
-  } as any);
+  });
 }
 
 export default async function DocsPage({ params }: PageProps) {
