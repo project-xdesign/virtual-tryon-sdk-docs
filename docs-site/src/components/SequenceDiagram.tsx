@@ -169,8 +169,9 @@ export default function SequenceDiagram() {
         .meta-code {
           font-family: var(--font-code);
           font-size: 0.75rem;
-          background-color: rgba(0, 0, 0, 0.3);
+          background-color: hsl(var(--bg-code-panel));
           border: 1px solid hsl(var(--border-color));
+          color: hsl(var(--text-code));
           padding: 6px 10px;
           border-radius: 4px;
           line-height: 1.4;
@@ -181,7 +182,7 @@ export default function SequenceDiagram() {
         /* Web Transaction Visualizer */
         .visualizer-container {
           margin-top: 36px;
-          background-color: rgba(15, 15, 18, 0.6);
+          background-color: hsl(var(--bg-sidebar));
           border: 1px solid hsl(var(--border-color));
           border-radius: 12px;
           padding: 24px;
@@ -216,7 +217,7 @@ export default function SequenceDiagram() {
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+          box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
         .actor-name {
@@ -285,7 +286,8 @@ export default function SequenceDiagram() {
         }
 
         .visualizer-detail {
-          background-color: rgba(0, 0, 0, 0.2);
+          background-color: hsl(var(--bg-card));
+          border: 1px solid hsl(var(--border-color));
           border-radius: 8px;
           padding: 12px 16px;
           border-left: 3px solid hsl(var(--accent-cyan));

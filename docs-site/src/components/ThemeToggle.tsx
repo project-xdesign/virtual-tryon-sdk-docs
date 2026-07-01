@@ -72,6 +72,18 @@ export default function ThemeToggle() {
           flex-grow: 1;
           text-align: left;
         }
+        @media (max-width: 768px) {
+          .theme-text {
+            display: none;
+          }
+          .theme-toggle-btn {
+            width: 38px;
+            height: 38px;
+            padding: 0;
+            justify-content: center;
+            border-radius: 50%;
+          }
+        }
       `}</style>
     </button>
   );
