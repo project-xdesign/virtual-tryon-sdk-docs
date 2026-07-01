@@ -4,8 +4,14 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import ThemeToggle from "@/components/ThemeToggle";
+import { Menu, X } from "lucide-react";
 
-export default function Header() {
+interface HeaderProps {
+  onMenuToggle?: () => void;
+  isSidebarOpen?: boolean;
+}
+
+export default function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
   const pathname = usePathname();
 
   // Determine current documentation category dynamically from url pathname
@@ -23,19 +29,30 @@ export default function Header() {
   return (
     <header className="global-header">
       <div className="header-container">
-        {/* Left: Brand logo */}
-        <Link href="/docs/api" className="header-logo">
-          <img
-            src="https://sdk.snapmydesign.com/logo-1225.webp"
-            alt="SnapIt Logo"
-            className="logo-img"
-          />
-          <div className="logo-text-container">
-            <span className="logo-text-title">SnapIt</span>
-            <span className="logo-text-sub">SDK Docs</span>
-          </div>
-          <div className="sdk-version-badge">v1.1</div>
-        </Link>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          {/* Hamburger Menu Toggle (Mobile only) */}
+          <button
+            className="mobile-nav-toggle"
+            onClick={onMenuToggle}
+            aria-label="Toggle navigation menu"
+          >
+            {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+
+          {/* Left: Brand logo */}
+          <Link href="/docs/api" className="header-logo">
+            <img
+              src="https://sdk.snapmydesign.com/logo-1225.webp"
+              alt="SnapIt Logo"
+              className="logo-img"
+            />
+            <div className="logo-text-container">
+              <span className="logo-text-title">SnapIt</span>
+              <span className="logo-text-sub">SDK Docs</span>
+            </div>
+            <div className="sdk-version-badge">v1.1</div>
+          </Link>
+        </div>
 
         {/* Center: Navigation category tabs */}
         <nav className="header-tabs">

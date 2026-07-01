@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, BookOpen, Key, Activity, BarChart2, ShieldAlert, Code2, CloudUpload, Play, Wallet, History, HeartPulse } from "lucide-react";
+import { Search, BookOpen, Key, Activity, BarChart2, ShieldAlert, Code2, CloudUpload, Play, Wallet, History, HeartPulse, ChevronLeft } from "lucide-react";
 
 interface NavLink {
   title: string;
@@ -17,9 +17,21 @@ interface NavGroup {
   links: NavLink[];
 }
 
-export default function Sidebar() {
+interface SidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Auto-close sidebar on mobile after navigating
+  useEffect(() => {
+    if (onClose) {
+      onClose();
+    }
+  }, [pathname]);
 
   // Determine current documentation category dynamically from url pathname
   let currentCategory: "api" | "flutter" | "ios" | "android" | "npm" = "api";
@@ -118,12 +130,6 @@ export default function Sidebar() {
       ]
     },
     {
-      groupTitle: "Usage Reference",
-      links: [
-        { title: "VTONViewController", href: "/docs/ios/controller", icon: <Play size={16} /> }
-      ]
-    },
-    {
       groupTitle: "Examples",
       links: [
         { title: "SwiftUI Integration", href: "/docs/ios/examples", icon: <Code2 size={16} /> }
@@ -137,12 +143,6 @@ export default function Sidebar() {
       links: [
         { title: "Introduction", href: "/docs/android", icon: <BookOpen size={16} /> },
         { title: "Installation", href: "/docs/android/installation", icon: <CloudUpload size={16} /> }
-      ]
-    },
-    {
-      groupTitle: "Usage Reference",
-      links: [
-        { title: "VtonActivity", href: "/docs/android/activity", icon: <Play size={16} /> }
       ]
     },
     {
@@ -174,7 +174,57 @@ export default function Sidebar() {
     .filter((group) => group.links.length > 0);
 
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${isOpen ? "open" : ""}`}>
+      {/* Mobile Drawer Header with Close Button */}
+      <div className="sidebar-mobile-header">
+        <div className="sidebar-group-title" style={{ margin: 0 }}>Navigation Menu</div>
+        <button className="sidebar-close-btn" onClick={onClose} aria-label="Close menu">
+          <ChevronLeft size={20} />
+        </button>
+      </div>
+
+      {/* Category selector for mobile/tablet */}
+      <div className="sidebar-categories-mobile">
+        <div className="sidebar-group-title" style={{ marginBottom: 12 }}>SDKs & APIs</div>
+        <div className="categories-grid-mobile">
+          <Link
+            href="/docs/api"
+            className={`category-link-mobile ${currentCategory === "api" ? "active" : ""}`}
+            onClick={onClose}
+          >
+            API Reference
+          </Link>
+          <Link
+            href="/docs/npm"
+            className={`category-link-mobile ${currentCategory === "npm" ? "active" : ""}`}
+            onClick={onClose}
+          >
+            NPM SDK
+          </Link>
+          <Link
+            href="/docs/flutter"
+            className={`category-link-mobile ${currentCategory === "flutter" ? "active" : ""}`}
+            onClick={onClose}
+          >
+            Flutter SDK
+          </Link>
+          <Link
+            href="/docs/ios"
+            className={`category-link-mobile ${currentCategory === "ios" ? "active" : ""}`}
+            onClick={onClose}
+          >
+            iOS SDK
+          </Link>
+          <Link
+            href="/docs/android"
+            className={`category-link-mobile ${currentCategory === "android" ? "active" : ""}`}
+            onClick={onClose}
+          >
+            Android SDK
+          </Link>
+        </div>
+      </div>
+
       {/* Search */}
       <div className="sidebar-search" style={{ marginTop: 12 }}>
         <Search />
@@ -220,6 +270,7 @@ export default function Sidebar() {
                     key={linkIdx}
                     href={link.href}
                     className={`sidebar-link ${isActive ? "active" : ""}`}
+                    onClick={onClose}
                   >
                     {link.icon}
                     <span style={{ flexGrow: 1 }}>{link.title}</span>

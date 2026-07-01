@@ -1,11 +1,12 @@
 import React from "react";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { ENDPOINTS, QUICK_REFERENCE, MODEL_MATRIX, ERROR_CODES, STANDARD_ERROR_JSON } from "@/lib/docsData";
 import SequenceDiagram from "@/components/SequenceDiagram";
 import CreditCalculator from "@/components/CreditCalculator";
 import ApiPlayground from "@/components/ApiPlayground";
-import { ArrowRight, HelpCircle, CheckCircle2, ShieldAlert, Sparkles, BookOpen, Key, Activity, Coins, Copy } from "lucide-react";
+import { ArrowRight, HelpCircle, CheckCircle2, ShieldAlert, Sparkles, BookOpen, Key, Activity, Coins, Copy, ChevronLeft, ChevronRight, Lock, GitCompare } from "lucide-react";
 
 interface PageProps {
   params: Promise<{ slug?: string[] }>;
@@ -407,6 +408,93 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
+const PAGINATION_MAP: Record<string, { title: string; href: string }[]> = {
+  api: [
+    { title: "Introduction", href: "/docs/api" },
+    { title: "Authentication", href: "/docs/api/authentication" },
+    { title: "Integration Workflow", href: "/docs/api/workflow" },
+    { title: "Upload VTON Images", href: "/docs/api/endpoints/upload" },
+    { title: "Generate Try-On", href: "/docs/api/endpoints/generate" },
+    { title: "Check Credits", href: "/docs/api/endpoints/credits" },
+    { title: "Get History", href: "/docs/api/endpoints/history" },
+    { title: "Service Health Check", href: "/docs/api/endpoints/health-check" },
+    { title: "Model & Credit Matrix", href: "/docs/api/credit-matrix" },
+    { title: "Error Handling", href: "/docs/api/errors" },
+    { title: "Code Examples", href: "/docs/api/examples" },
+  ],
+  npm: [
+    { title: "Introduction", href: "/docs/npm" },
+    { title: "Installation & Setup", href: "/docs/npm/installation" },
+    { title: "Client API Reference", href: "/docs/npm/client-reference" },
+    { title: "Error Handling", href: "/docs/npm/errors" },
+    { title: "Full Integration Flow", href: "/docs/npm/examples" },
+  ],
+  flutter: [
+    { title: "Introduction", href: "/docs/flutter" },
+    { title: "Installation", href: "/docs/flutter/installation" },
+    { title: "Configuration", href: "/docs/flutter/configuration" },
+    { title: "Try-On Flow Widget", href: "/docs/flutter/widgets/try-on-viewer" },
+    { title: "Full App Example", href: "/docs/flutter/examples" },
+  ],
+  ios: [
+    { title: "Introduction", href: "/docs/ios" },
+    { title: "Installation", href: "/docs/ios/installation" },
+    { title: "SwiftUI Integration", href: "/docs/ios/examples" },
+  ],
+  android: [
+    { title: "Introduction", href: "/docs/android" },
+    { title: "Installation", href: "/docs/android/installation" },
+    { title: "Kotlin Integration", href: "/docs/android/examples" },
+  ],
+};
+
+function renderPagination(prevPage: { title: string; href: string } | null, nextPage: { title: string; href: string } | null) {
+  if (!prevPage && !nextPage) return null;
+  return (
+    <div key="doc-pagination" className="doc-pagination-container">
+      {prevPage ? (
+        <Link href={prevPage.href} className="doc-pagination-link prev">
+          <span className="pagination-label">← Previous</span>
+          <span className="pagination-title">{prevPage.title}</span>
+        </Link>
+      ) : (
+        <div className="doc-pagination-spacer" />
+      )}
+      {nextPage ? (
+        <Link href={nextPage.href} className="doc-pagination-link next">
+          <span className="pagination-label">Next →</span>
+          <span className="pagination-title">{nextPage.title}</span>
+        </Link>
+      ) : (
+        <div className="doc-pagination-spacer" />
+      )}
+    </div>
+  );
+}
+
+function injectPagination(content: React.ReactNode, prevPage: any, nextPage: any): React.ReactNode {
+  if (!React.isValidElement(content)) return content;
+
+  const childrenArray = React.Children.toArray(content.props.children);
+  const updatedChildren = childrenArray.map((child) => {
+    if (React.isValidElement(child) && child.props.className === "content-wrapper") {
+      return React.cloneElement(child, {
+        ...child.props,
+        children: [
+          ...React.Children.toArray(child.props.children),
+          renderPagination(prevPage, nextPage)
+        ]
+      } as any);
+    }
+    return child;
+  });
+
+  return React.cloneElement(content, {
+    ...content.props,
+    children: updatedChildren
+  } as any);
+}
+
 export default async function DocsPage({ params }: PageProps) {
   const resolvedParams = await params;
   const slug = resolvedParams.slug || [];
@@ -490,6 +578,13 @@ export default async function DocsPage({ params }: PageProps) {
   const canonicalUrl = `https://docs.snapmydesign.com${canonical}`;
   const schemas = generateJsonLd(slug, title, description, canonicalUrl);
 
+  // Find previous and next pages based on sidebar order
+  const currentPath = slug.length > 0 ? "/docs/" + slug.join("/") : "/docs/" + category;
+  const pages = PAGINATION_MAP[category] || [];
+  const currentIndex = pages.findIndex((p) => p.href === currentPath);
+  const prevPage = currentIndex > 0 ? pages[currentIndex - 1] : null;
+  const nextPage = currentIndex < pages.length - 1 ? pages[currentIndex + 1] : null;
+
   return (
     <>
       {schemas.map((schema, idx) => (
@@ -499,7 +594,7 @@ export default async function DocsPage({ params }: PageProps) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
         />
       ))}
-      {content}
+      {injectPagination(content, prevPage, nextPage)}
     </>
   );
 }
@@ -596,7 +691,9 @@ function renderAuthentication() {
     <div className="main-layout" style={{ gridTemplateColumns: "1fr" }}>
       <div className="content-wrapper">
         <section className="doc-section">
-          <h1 className="doc-title">🔐 Authentication</h1>
+          <h1 className="doc-title" style={{ display: "inline-flex", alignItems: "center", gap: 12 }}>
+            <Lock className="text-cyan" size={32} /> Authentication
+          </h1>
           <p className="doc-subtitle">
             All request categories that process uploads or trigger generations must authenticate using a private API key.
           </p>
@@ -639,7 +736,7 @@ function renderAuthentication() {
             </div>
             <div className="code-content-wrapper">
               <pre className="code-block">
-                <code>{`curl -X POST "https://apigcp.snapmydesign.com/api/v1/vton/generate" \\
+                <code>{`curl -X POST "https://apisdk.snapmydesign.com/api/v1/vton/generate" \\
   -H "X-API-Key: smd_live_your_api_key_here" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -661,7 +758,9 @@ function renderWorkflow() {
     <div className="main-layout" style={{ gridTemplateColumns: "1fr" }}>
       <div className="content-wrapper">
         <section className="doc-section">
-          <h1 className="doc-title">🔄 Integration Workflow</h1>
+          <h1 className="doc-title" style={{ display: "inline-flex", alignItems: "center", gap: 12 }}>
+            <GitCompare className="text-cyan" size={32} /> Integration Workflow
+          </h1>
           <p className="doc-subtitle">
             The typical API integration follows a three-step cycle: Upload assets, Trigger AI generation, and Audit results.
           </p>
@@ -1247,6 +1346,15 @@ function renderIosIntro() {
           <p className="doc-p">
             The SnapIt iOS SDK provides clean Swift extensions, custom controllers, and network models optimized for Swift concurrency.
           </p>
+
+          <div className="alert-box tip" style={{ marginTop: 24 }}>
+            <HelpCircle />
+            <div>
+              <div className="alert-title">Prefer Direct API Integration?</div>
+              If you prefer not to use our Swift SDK and want to implement raw HTTP requests in Swift instead, you can directly integrate our endpoints. Refer to our <a href="/docs/api" className="text-cyan doc-strong">API Reference Guide</a>.
+            </div>
+          </div>
+
           <p className="doc-p" style={{ marginTop: 24 }}>
             To explore our web catalogue tool or create a developer account, visit the <a href="https://console.snapmydesign.com" target="_blank" rel="noopener noreferrer" style={{ color: "hsl(var(--accent-cyan))", textDecoration: "underline" }}>Snapmydesign Developer Console (console.snapmydesign.com)</a>.
           </p>
@@ -1261,14 +1369,35 @@ function renderIosInstallation() {
     <div className="main-layout" style={{ gridTemplateColumns: "1fr" }}>
       <div className="content-wrapper">
         <section className="doc-section">
-          <h1 className="doc-title">iOS SDK Installation</h1>
-          <p className="doc-subtitle">Add SnapIt using CocoaPods or Swift Package Manager.</p>
-          <h2 className="doc-h2">Swift Package Manager (SPM)</h2>
-          <p className="doc-p">In Xcode, select <strong>File &gt; Add Packages...</strong> and insert the SDK repository URL:</p>
+          <h1 className="doc-title">iOS Integration Setup</h1>
+          <p className="doc-subtitle">Integrating Virtual Try-On directly using standard system network frameworks.</p>
+
+          <div className="alert-box tip" style={{ margin: "24px 0" }}>
+            <HelpCircle />
+            <div>
+              <div className="alert-title">No SDK Package Required</div>
+              Since integrations route directly to the REST API, you do not need to install any external Swift packages, binary frameworks, or CocoaPods dependencies. This keeps your iOS app bundle size lightweight and clean.
+            </div>
+          </div>
+
+          <h2 className="doc-h2">Required Setup & Permissions</h2>
+          <p className="doc-p">
+            Ensure your app has standard Internet access. Because our REST API operates securely over HTTPS, no custom App Transport Security (ATS) exceptions or plist overrides are required.
+          </p>
+
+          <h2 className="doc-h2">Base Configuration</h2>
+          <p className="doc-p">
+            Define the VTON API base URL and your private API key in your configuration registry or plist file:
+          </p>
           <div className="code-panel">
-            <pre className="code-block">
-              <code>https://github.com/snapmydesign/virtual-tryon-sdk-ios.git</code>
-            </pre>
+            <div className="code-tabs">
+              <span className="code-tab active">API Endpoint</span>
+            </div>
+            <div className="code-content-wrapper">
+              <pre className="code-block">
+                <code>https://apisdk.snapmydesign.com/api/v1/vton/generate</code>
+              </pre>
+            </div>
           </div>
         </section>
       </div>
@@ -1317,8 +1446,12 @@ function renderIosExamples() {
     <div className="main-layout" style={{ gridTemplateColumns: "1fr" }}>
       <div className="content-wrapper">
         <section className="doc-section">
-          <h1 className="doc-title">iOS SwiftUI Example</h1>
-          <p className="doc-subtitle">Integrating Swift VTON wrapper in SwiftUI declarations.</p>
+          <h1 className="doc-title">SwiftUI API Integration</h1>
+          <p className="doc-subtitle">Calling the SnapIt REST API directly inside SwiftUI using native URLSession and Swift Concurrency.</p>
+
+          <p className="doc-p">
+            If you prefer not to include the binary size of the native SDK, you can issue direct API POST requests to our servers from SwiftUI views:
+          </p>
 
           <div className="code-panel">
             <div className="code-tabs">
@@ -1327,20 +1460,123 @@ function renderIosExamples() {
             <div className="code-content-wrapper">
               <pre className="code-block">
                 <code>{`import SwiftUI
-import SnapItSDK
 
+// 1. Define JSON Model Schemas
+struct VTONRequest: Codable {
+    let model_name: String
+    let inputClothesImageUrls: [String]
+}
+
+struct VTONResponse: Codable {
+    let status: String
+    let outputImageUrl: String?
+    let message: String?
+}
+
+// 2. Direct API Service Layer
+class VTONService {
+    static let shared = VTONService()
+    
+    func generateTryOn(garmentURL: String) async throws -> String {
+        guard let url = URL(string: "https://apisdk.snapmydesign.com/api/v1/vton/generate") else {
+            throw URLError(.badURL)
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("smd_live_your_api_key_here", forHTTPHeaderField: "X-API-Key")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let payload = VTONRequest(
+            model_name: "medium",
+            inputClothesImageUrls: [garmentURL]
+        )
+        request.httpBody = try JSONEncoder().encode(payload)
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw URLError(.badServerResponse)
+        }
+        
+        let result = try JSONDecoder().decode(VTONResponse::self, from: data)
+        guard let outputURL = result.outputImageUrl else {
+            throw NSError(domain: "VTON", code: 0, userInfo: [
+                NSLocalizedDescriptionKey: result.message ?? "Generation failed"
+            ])
+        }
+        return outputURL
+    }
+}
+
+// 3. SwiftUI Component View
 struct ContentView: View {
-    @State private var showingTryOn = false
+    @State private var resultURL: String?
+    @State private var isLoading = false
+    @State private var errorText: String?
+    
+    let garmentImageURL = "https://assets.url/dress.jpg"
     
     var body: some View {
-        Button("Try on Shirt") {
-            showingTryOn = true
+        VStack(spacing: 24) {
+            Text("SnapIt Direct API Try-On")
+                .font(.headline)
+            
+            if isLoading {
+                ProgressView("Running AI workers...")
+            } else if let output = resultURL, let url = URL(string: output) {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image.resizable().scaledToFit()
+                    case .failure:
+                        Text("Failed to render output image")
+                    default:
+                        ProgressView()
+                    }
+                }
+                .frame(maxHeight: 350)
+                .cornerRadius(12)
+            } else {
+                Text("Ready to generate try-on model")
+                    .foregroundColor(.secondary)
+            }
+            
+            if let error = errorText {
+                Text(error).foregroundColor(.red).font(.caption)
+            }
+            
+            Button(action: triggerTryOn) {
+                Text("Generate Try-On")
+                    .bold()
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+            .disabled(isLoading)
         }
-        .sheet(isPresented: $showingTryOn) {
-            SwiftUITryOnView(
-                apiKey: "smd_live_your_key",
-                garmentURL: "https://..."
-            )
+        .padding()
+    }
+    
+    private func triggerTryOn() {
+        isLoading = true
+        errorText = nil
+        
+        Task {
+            do {
+                let url = try await VTONService.shared.generateTryOn(garmentURL: garmentImageURL)
+                await MainActor.run {
+                    self.resultURL = url
+                    self.isLoading = false
+                }
+            } catch {
+                await MainActor.run {
+                    self.errorText = error.localizedDescription
+                    self.isLoading = false
+                }
+            }
         }
     }
 }`}</code>
@@ -1371,6 +1607,15 @@ function renderAndroidIntro() {
           <p className="doc-p">
             Integrate virtual try-on engines directly into layouts, fragments, or modern Jetpack Compose flows.
           </p>
+
+          <div className="alert-box tip" style={{ marginTop: 24 }}>
+            <HelpCircle />
+            <div>
+              <div className="alert-title">Prefer Direct API Integration?</div>
+              If you prefer not to use our Kotlin SDK and want to implement raw HTTP requests using Retrofit, Ktor, or OkHttp instead, you can directly integrate our endpoints. Refer to our <a href="/docs/api" className="text-cyan doc-strong">API Reference Guide</a>.
+            </div>
+          </div>
+
           <p className="doc-p" style={{ marginTop: 24 }}>
             To explore our web catalogue tool or create a developer account, visit the <a href="https://console.snapmydesign.com" target="_blank" rel="noopener noreferrer" style={{ color: "hsl(var(--accent-cyan))", textDecoration: "underline" }}>Snapmydesign Developer Console (console.snapmydesign.com)</a>.
           </p>
@@ -1385,19 +1630,43 @@ function renderAndroidInstallation() {
     <div className="main-layout" style={{ gridTemplateColumns: "1fr" }}>
       <div className="content-wrapper">
         <section className="doc-section">
-          <h1 className="doc-title">Android SDK Installation</h1>
-          <p className="doc-subtitle">Add the Gradle dependency repository link.</p>
-          <p className="doc-p">Add the library directly inside your app’s `build.gradle` file:</p>
+          <h1 className="doc-title">Android Integration Setup</h1>
+          <p className="doc-subtitle">Integrating Virtual Try-On directly using standard system network libraries.</p>
 
+          <div className="alert-box tip" style={{ margin: "24px 0" }}>
+            <HelpCircle />
+            <div>
+              <div className="alert-title">No Gradle Package Required</div>
+              Since integrations route directly to the REST API, you do not need to install any external AAR binaries or Gradle dependencies. This prevents method count bloat and keeps your Android APK lightweight.
+            </div>
+          </div>
+
+          <h2 className="doc-h2">Required Setup & Permissions</h2>
+          <p className="doc-p">
+            Ensure your application has internet access permission declared inside your <code>AndroidManifest.xml</code>:
+          </p>
           <div className="code-panel" style={{ margin: "24px 0" }}>
             <div className="code-tabs">
-              <span className="code-tab active">build.gradle</span>
+              <span className="code-tab active">AndroidManifest.xml</span>
             </div>
             <div className="code-content-wrapper">
               <pre className="code-block">
-                <code>{`dependencies {
-    implementation 'com.github.snapmydesign:virtual-tryon-sdk-android:1.1.0'
-}`}</code>
+                <code>{`<uses-permission android:name="android.permission.INTERNET" />`}</code>
+              </pre>
+            </div>
+          </div>
+
+          <h2 className="doc-h2">Base Configuration</h2>
+          <p className="doc-p">
+            Define the VTON API base URL and your private API key in your resource variables:
+          </p>
+          <div className="code-panel">
+            <div className="code-tabs">
+              <span className="code-tab active">API Endpoint</span>
+            </div>
+            <div className="code-content-wrapper">
+              <pre className="code-block">
+                <code>https://apisdk.snapmydesign.com/api/v1/vton/generate</code>
               </pre>
             </div>
           </div>
@@ -1447,8 +1716,12 @@ function renderAndroidExamples() {
     <div className="main-layout" style={{ gridTemplateColumns: "1fr" }}>
       <div className="content-wrapper">
         <section className="doc-section">
-          <h1 className="doc-title">Android Jetpack Compose Example</h1>
-          <p className="doc-subtitle">Setting up interactive layouts in composable functions.</p>
+          <h1 className="doc-title">Kotlin API Integration</h1>
+          <p className="doc-subtitle">Calling the SnapIt REST API directly in Jetpack Compose using native Coroutines and OkHttp.</p>
+
+          <p className="doc-p">
+            If you prefer not to include the binary size of the native SDK, you can issue direct API POST requests to our servers from Compose views:
+          </p>
 
           <div className="code-panel">
             <div className="code-tabs">
@@ -1456,18 +1729,129 @@ function renderAndroidExamples() {
             </div>
             <div className="code-content-wrapper">
               <pre className="code-block">
-                <code>{`import androidx.compose.runtime.*
-import com.snapit.sdk.compose.TryOnWidget
+                <code>{`package com.example.vton
 
-@Composable
-fun ProductDetailScreen() {
-    TryOnWidget(
-        apiKey = "smd_live_your_key",
-        garmentUrl = "https://...",
-        onSuccess = { resultUrl ->
-            // render result in view
+import android.os.Bundle
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONArray
+import org.json.JSONObject
+
+// 1. Direct API Service Layer
+class VTONService {
+    private val client = OkHttpClient()
+    private val mediaType = "application/json; charset=utf-8".toMediaType()
+
+    suspend fun generateTryOn(garmentUrl: String): String = withContext(Dispatchers.IO) {
+        val url = "https://apisdk.snapmydesign.com/api/v1/vton/generate"
+        
+        // Prepare JSON payload
+        val jsonPayload = JSONObject().apply {
+            put("model_name", "medium")
+            put("inputClothesImageUrls", JSONArray().apply { put(garmentUrl) })
         }
-    )
+
+        val body = jsonPayload.toString().toRequestBody(mediaType)
+        val request = Request.Builder()
+            .url(url)
+            .post(body)
+            .addHeader("X-API-Key", "smd_live_your_api_key_here")
+            .addHeader("Content-Type", "application/json")
+            .build()
+
+        client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) throw Exception("HTTP Error: \${response.code}")
+            
+            val responseBody = response.body?.string() ?: throw Exception("Empty response body")
+            val jsonResponse = JSONObject(responseBody)
+            
+            if (jsonResponse.optString("status") == "success" || jsonResponse.has("outputImageUrl")) {
+                jsonResponse.getString("outputImageUrl")
+            } else {
+                throw Exception(jsonResponse.optString("message", "Generation failed"))
+            }
+        }
+    }
+}
+
+// 2. Jetpack Compose Screen View
+@Composable
+fun ProductDetailScreen(service: VTONService = VTONService()) {
+    var resultUrl by remember { mutableStateOf<String?>(null) }
+    var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    
+    val coroutineScope = rememberCoroutineScope()
+    val garmentUrl = "https://assets.url/dress.jpg"
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text("SnapIt Direct API Integration", style = MaterialTheme.typography.titleMedium)
+        
+        Spacer(modifier = Modifier.height(24.dp))
+
+        if (isLoading) {
+            CircularProgressIndicator()
+            Spacer(modifier = Modifier.height(8.dp))
+            Text("AI workers processing image...")
+        } else if (resultUrl != null) {
+            // Coil's AsyncImage for rendering try-on result
+            AsyncImage(
+                model = resultUrl,
+                contentDescription = "Try-On Result",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(350.dp)
+            )
+        } else {
+            Text("Ready to run virtual try-on.", color = MaterialTheme.colorScheme.outline)
+        }
+
+        errorMessage?.let {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text("Error: \$it", color = MaterialTheme.colorScheme.error)
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = {
+                isLoading = true
+                errorMessage = null
+                coroutineScope.launch {
+                    try {
+                        val output = service.generateTryOn(garmentUrl)
+                        resultUrl = output
+                    } catch (e: Exception) {
+                        errorMessage = e.message ?: "Unknown error"
+                    } finally {
+                        isLoading = false
+                    }
+                }
+            },
+            enabled = !isLoading,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Generate Try-On")
+        }
+    }
 }`}</code>
               </pre>
             </div>
